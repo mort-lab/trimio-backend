@@ -1,85 +1,215 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# ✂️💈 **Trimio Backend** 💈✂️
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+¡Bienvenido a **Trimio**! 🚀 Esta es la plataforma definitiva para gestionar barberías de forma eficiente. Con **Trimio**, los barberos pueden gestionar citas, servicios, y estadísticas 📊 a través de un panel web, mientras que los clientes pueden encontrar barberías, reservar citas y pagar desde la comodidad de su móvil. 📱💳
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 📜 **Índice**
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+1. [Características Principales](#-características-principales)
+2. [Tecnologías Utilizadas](#-tecnologías-utilizadas)
+3. [Estructura de la Base de Datos](#-estructura-de-la-base-de-datos)
+4. [Endpoints de la API](#-endpoints-de-la-api)
+5. [Guía de Instalación](#-guía-de-instalación)
+6. [Cómo Usar el Proyecto](#-cómo-usar-el-proyecto)
+7. [Pruebas](#-pruebas)
+8. [Contribuciones](#-contribuciones)
+9. [Licencia](#-licencia)
 
-## Project setup
+---
+
+## ✨ **Características Principales**
+
+- 📊 **Panel de Control para Barberos**: Gestión de citas, servicios y estadísticas.
+- 📱 **App para Clientes**: Encuentra barberías, reserva citas y paga online.
+- 💈 **Gestión Integral de Barberías**: Desde servicios hasta pagos.
+- 🔒 **Seguridad**: Autenticación mediante tokens JWT, cifrado de contraseñas y pagos seguros con Stripe.
+- 📈 **Estadísticas en Tiempo Real**: Ingresos, calificaciones y número de citas para cada barbero y barbería.
+
+---
+
+## 🛠 **Tecnologías Utilizadas**
+
+- **Framework**: [NestJS](https://nestjs.com/) 🛡 - Un framework de Node.js para crear aplicaciones escalables y eficientes.
+- **Base de Datos**: [PostgreSQL](https://www.postgresql.org/) 🐘 - Un potente sistema de base de datos relacional.
+- **ORM**: [Prisma](https://www.prisma.io/) 🌐 - Un ORM moderno para trabajar con bases de datos.
+- **Autenticación**: JWT (JSON Web Tokens) 🔐
+- **Pagos**: [Stripe](https://stripe.com/) 💳 - Integración de pagos segura.
+
+---
+
+## 🗃 **Estructura de la Base de Datos**
+
+La base de datos está organizada de forma relacional para optimizar el rendimiento y la integridad de los datos.
+
+### 📦 **Tablas Principales**
+
+- **Usuarios** (users) 👤: Almacena clientes, barberos y administradores.
+- **Barberías** (barbershops) 💈: Información sobre las barberías.
+- **Barberos** (barbers) ✂️: Barberos que trabajan en las barberías.
+- **Servicios** (services) 💇‍♂️: Servicios ofrecidos por los barberos.
+- **Citas** (appointments) 📅: Información sobre las citas de los clientes.
+- **Pagos** (payments) 💸: Datos sobre los pagos procesados.
+- **Estadísticas** (statistics) 📊: Información analítica sobre barberos y barberías.
+
+---
+
+## 🔌 **Endpoints de la API**
+
+A continuación, se muestran los endpoints principales de la API REST construida con **NestJS**.
+
+### 🔐 **Autenticación**
+
+- POST /auth/register - Registro de nuevos usuarios.
+- POST /auth/login - Inicio de sesión.
+- POST /auth/refresh - Refrescar token JWT.
+
+### 👥 **Usuarios**
+
+- GET /users/profile - Obtener perfil del usuario.
+- PUT /users/update-profile - Actualizar perfil.
+- DELETE /users/delete-account - Eliminar cuenta de usuario.
+
+### 💈 **Barberías**
+
+- POST /barbershops - Crear una barbería.
+- GET /barbershops/:id - Obtener detalles de una barbería.
+- PUT /barbershops/:id - Actualizar una barbería.
+- DELETE /barbershops/:id - Eliminar una barbería.
+
+### ✂️ **Barberos**
+
+- POST /barbers - Añadir un barbero.
+- GET /barbers/:id - Obtener detalles de un barbero.
+- GET /barbers/barbershop/:id - Listar barberos de una barbería.
+
+### 💇‍♂️ **Servicios**
+
+- POST /services - Crear un servicio.
+- GET /services/:id - Obtener detalles de un servicio.
+- GET /services/barber/:id - Listar servicios de un barbero.
+
+### 📅 **Citas**
+
+- POST /appointments - Reservar una cita.
+- GET /appointments/:id - Obtener detalles de una cita.
+
+### 💳 **Pagos**
+
+- POST /payments - Procesar un pago.
+- GET /payments/:id - Ver detalles de un pago.
+
+### 📊 **Estadísticas**
+
+- GET /statistics/barber/:id - Obtener estadísticas de un barbero.
+- GET /statistics/barbershop/:id - Estadísticas de una barbería.
+
+---
+
+## 🛠 **Guía de Instalación**
+
+### 🖥 **Requisitos Previos**
+
+- [Node.js](https://nodejs.org/) (v16+)
+- [PostgreSQL](https://www.postgresql.org/)
+
+### ⚙️ **Pasos de Instalación**
+
+1. **Clonar el repositorio**:
+
+   ```bash
+   git clone https://github.com/tu-usuario/trimio-backend.git
+   cd trimio-backend
+   ```
+
+2. **Instalar dependencias**:
+
+   ```bash
+   npm install
+   ```
+
+3. **Configurar variables de entorno**:
+   Crea un archivo .env en la raíz del proyecto y agrega las siguientes variables:
+
+   ```bash
+   DATABASE_URL=postgres://usuario:contraseña@localhost:5432/trimio
+   JWT_SECRET=tu_secreto
+   STRIPE_SECRET_KEY=tu_stripe_secret_key
+   ```
+
+4. **Correr migraciones de la base de datos**:
+
+   ```bash
+   npx prisma migrate dev
+   ```
+
+5. **Iniciar el servidor de desarrollo**:
+   ```bash
+   npm run start:dev
+   ```
+
+¡Listo! 🎉 La API estará disponible en http://localhost:3000/api y puedes explorar la documentación con Swagger en http://localhost:3000/api.
+
+---
+
+## 🚀 **Cómo Usar el Proyecto**
+
+### 💻 **Modo Desarrollo**
+
+Inicia el servidor en modo desarrollo con monitoreo automático de cambios:
 
 ```bash
-$ npm install
+npm run start:dev
 ```
 
-## Compile and run the project
+### 🏭 **Modo Producción**
+
+Compila el proyecto y ejecuta en modo producción:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run build
+npm run start:prod
 ```
 
-## Run tests
+---
+
+## 🧪 **Pruebas**
+
+### 📦 **Ejecutar Pruebas**
+
+Ejecuta las pruebas unitarias y end-to-end (e2e) incluidas en el proyecto:
 
 ```bash
-# unit tests
-$ npm run test
+# Pruebas unitarias
+npm run test
 
-# e2e tests
-$ npm run test:e2e
+# Pruebas end-to-end
+npm run test:e2e
 
-# test coverage
-$ npm run test:cov
+# Cobertura de pruebas
+npm run test:cov
 ```
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## 🤝 **Contribuciones**
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+¡Las contribuciones son bienvenidas! Si deseas mejorar este proyecto, sigue estos pasos:
 
-## Support
+1. Haz un fork del repositorio.
+2. Crea una rama de características (git checkout -b feature-nueva-caracteristica).
+3. Haz tus cambios y realiza commits (git commit -m 'Agrega nueva característica').
+4. Sube tus cambios (git push origin feature-nueva-caracteristica).
+5. Abre un Pull Request para revisión.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+## 📄 **Licencia**
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Este proyecto está licenciado bajo la licencia MIT. Consulta el archivo LICENSE para obtener más información.
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+🌟 **Gracias por usar Trimio** 🌟
+
+Si te gustó el proyecto, ¡no olvides dejar una ⭐ en el repositorio y compartirlo con tu equipo! 💬
