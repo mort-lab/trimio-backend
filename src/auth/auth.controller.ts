@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-@ApiTags('auth') // Definir claramente el tag para que aparezca en Swagger
+@ApiTags('Auth') // Definir claramente el tag para que aparezca en Swagger
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}

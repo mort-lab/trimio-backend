@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { BarbershopsModule } from './barbershops/barbershops.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { BarbershopsModule } from './barbershops/barbershops.module';
     AuthModule,
     UsersModule,
     BarbershopsModule,
+    ServicesModule,
   ],
   controllers: [],
   providers: [PrismaService],

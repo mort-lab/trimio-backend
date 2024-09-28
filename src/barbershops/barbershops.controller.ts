@@ -22,7 +22,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 
-@ApiTags('barbershops') // Añadir el tag para barbershops
+@ApiTags('Barbershops') // Añadir el tag para barbershops
 @ApiBearerAuth()
 @Controller('barbershops')
 @UseGuards(JwtAuthGuard)
