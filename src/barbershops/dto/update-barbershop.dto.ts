@@ -1,25 +1,44 @@
 // src/barbershops/dto/update-barbershop.dto.ts
-import { IsString, IsOptional, Length } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger'; // Nota: ApiPropertyOptional es para campos opcionales
+import {
+  IsString,
+  IsOptional,
+  Length,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateBarbershopDto {
   @ApiPropertyOptional({
-    example: 'Barbería Nueva',
-    description: 'Nuevo nombre de la barbería (opcional)',
+    example: 'Nueva Barbería',
+    description: 'Nuevo nombre de la barbería',
   })
-  @IsString()
   @IsOptional()
-  @Length(3, 50, { message: 'El nombre debe tener entre 3 y 50 caracteres' })
+  @IsString()
+  @Length(3, 50)
   name?: string;
 
   @ApiPropertyOptional({
-    example: 'Calle Nueva 123',
-    description: 'Nueva ubicación de la barbería (opcional)',
+    example: 'Nueva Ubicación',
+    description: 'Nueva ubicación de la barbería',
   })
-  @IsString()
   @IsOptional()
-  @Length(5, 100, {
-    message: 'La ubicación debe tener entre 5 y 100 caracteres',
-  })
+  @IsString()
+  @Length(5, 100)
   location?: string;
+
+  @ApiPropertyOptional({ example: 40.7128, description: 'Latitud' })
+  @IsOptional()
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  latitude?: number;
+
+  @ApiPropertyOptional({ example: -74.006, description: 'Longitud' })
+  @IsOptional()
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  longitude?: number;
 }

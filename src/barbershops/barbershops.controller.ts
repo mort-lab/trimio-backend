@@ -1,15 +1,14 @@
-//src/barbershops/barbershops.controller.ts
-
+// src/barbershops/barbershops.controller.ts
 import {
   Controller,
   Post,
   Body,
-  UseGuards,
   Get,
   Param,
   Put,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { BarbershopsService } from './barbershops.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -31,8 +30,6 @@ import {
 export class BarbershopsController {
   constructor(private readonly barbershopsService: BarbershopsService) {}
 
-  @ApiOperation({ summary: 'Create a new barbershop' })
-  @ApiResponse({ status: 201, description: 'Barbershop successfully created' })
   @Post()
   create(
     @GetUser() user: User,
@@ -41,25 +38,6 @@ export class BarbershopsController {
     return this.barbershopsService.create(user.id, createBarbershopDto);
   }
 
-  @ApiOperation({ summary: 'List all barbershops with pagination' })
-  @ApiResponse({
-    status: 200,
-    description: 'Successfully fetched barbershop list',
-  })
-  @Get()
-  findAll(@Query('page') page = 1, @Query('limit') limit = 10) {
-    return this.barbershopsService.findAll({ page, limit });
-  }
-
-  @ApiOperation({ summary: 'Get a barbershop by ID' })
-  @ApiResponse({ status: 200, description: 'Successfully fetched barbershop' })
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.barbershopsService.findOne(id);
-  }
-
-  @ApiOperation({ summary: 'Update an existing barbershop' })
-  @ApiResponse({ status: 200, description: 'Barbershop successfully updated' })
   @Put(':id')
   update(
     @Param('id') id: string,
@@ -69,8 +47,26 @@ export class BarbershopsController {
     return this.barbershopsService.update(id, user.id, updateBarbershopDto);
   }
 
-  @ApiOperation({ summary: 'Delete a barbershop' })
-  @ApiResponse({ status: 200, description: 'Barbershop successfully deleted' })
+  @Get()
+  findAll(@Query('page') page = 1, @Query('limit') limit = 10) {
+    return this.barbershopsService.findAll({ page, limit });
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.barbershopsService.findOne(id);
+  }
+
+  @Get('nearby')
+  @ApiOperation({ summary: 'Obtener barberías cercanas a una ubicación' })
+  findNearby(
+    @Query('latitude') latitude: number,
+    @Query('longitude') longitude: number,
+    @Query('radius') radius = 5000, // Radio en metros
+  ) {
+    return this.barbershopsService.findNearby(latitude, longitude, radius);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string, @GetUser() user: User) {
     return this.barbershopsService.remove(id, user.id);

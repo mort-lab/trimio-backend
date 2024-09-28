@@ -1,4 +1,4 @@
-//src/services/services.controller.ts
+// src/services/services.controller.ts
 
 import {
   Controller,
@@ -9,6 +9,7 @@ import {
   Put,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -40,15 +41,14 @@ export class ServicesController {
   @Get()
   @ApiOperation({ summary: 'Get all services' })
   @ApiResponse({ status: 200, description: 'Return all services.' })
-  findAll() {
-    return this.servicesService.findAll(); // No paginación
+  findAll(@Query('skip') skip = 0, @Query('take') take = 10) {
+    return this.servicesService.findAll(skip, take); // Paginar resultados
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a service by id' })
   @ApiResponse({ status: 200, description: 'Return the service.' })
   findOne(@Param('id') id: string) {
-    // UUID string
     return this.servicesService.findOne(id);
   }
 
@@ -63,7 +63,7 @@ export class ServicesController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a service' })
+  @ApiOperation({ summary: 'Soft delete a service' })
   @ApiResponse({
     status: 200,
     description: 'The service has been successfully deleted.',
@@ -78,7 +78,11 @@ export class ServicesController {
     status: 200,
     description: 'Return all services for the specified barbershop.',
   })
-  findByBarbershop(@Param('id') id: string) {
-    return this.servicesService.findByBarbershop(id);
+  findByBarbershop(
+    @Param('id') id: string,
+    @Query('skip') skip = 0,
+    @Query('take') take = 10,
+  ) {
+    return this.servicesService.findByBarbershop(id, skip, take); // Paginar resultados
   }
 }

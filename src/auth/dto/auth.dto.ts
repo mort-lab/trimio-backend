@@ -1,5 +1,5 @@
 // src/auth/dto/auth.dto.ts
-import { IsEmail, IsString, MinLength, IsEnum } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsEnum, Matches } from 'class-validator';
 import { Role } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -8,7 +8,7 @@ export class AuthDto {
     example: 'user@example.com',
     description: 'User email address',
   })
-  @IsEmail({}, { message: 'Invalid email format' })
+  @IsEmail({}, { message: 'The email format is incorrect' })
   email: string;
 
   @ApiProperty({
@@ -17,6 +17,10 @@ export class AuthDto {
   })
   @IsString({ message: 'Password is required' })
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*])/, {
+    message:
+      'Password must include uppercase, lowercase, number, and special character',
+  })
   password: string;
 
   @ApiProperty({

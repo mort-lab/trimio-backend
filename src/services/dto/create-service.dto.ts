@@ -1,4 +1,4 @@
-//src/services/dto/create-service.dto.ts
+// src/services/dto/create-service.dto.ts
 
 import {
   IsString,
@@ -33,7 +33,7 @@ export class CreateServiceDto {
     description: 'Precio del servicio',
   })
   @IsNumber({ maxDecimalPlaces: 2 })
-  @IsPositive()
+  @Min(5, { message: 'Price must be at least $5' }) // Mínimo precio de $5
   price: number;
 
   @ApiProperty({
@@ -41,6 +41,7 @@ export class CreateServiceDto {
     description: 'Duración del servicio en minutos',
   })
   @IsPositive()
+  @Min(10, { message: 'Duration must be at least 10 minutes' })
   duration: number;
 
   @ApiProperty({
@@ -74,6 +75,6 @@ export class CreateServiceDto {
     required: false,
   })
   @IsOptional()
-  @IsUrl()
+  @IsUrl({}, { message: 'Invalid image URL format' })
   imageUrl?: string;
 }

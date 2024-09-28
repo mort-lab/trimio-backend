@@ -1,6 +1,10 @@
-//src/services/services.service.ts
+// src/services/services.service.ts
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 
@@ -9,13 +13,31 @@ export class ServicesService {
   constructor(private prisma: PrismaService) {}
 
   async create(createServiceDto: CreateServiceDto) {
+    // Validación para evitar duplicados
+    const existingService = await this.prisma.service.findFirst({
+      where: {
+        barbershopId: createServiceDto.barbershopId,
+        serviceName: createServiceDto.serviceName,
+      },
+    });
+
+    if (existingService) {
+      throw new BadRequestException(
+        'Service with this name already exists in the barbershop',
+      );
+    }
+
     return this.prisma.service.create({
       data: createServiceDto,
     });
   }
 
-  async findAll() {
+  async findAll(skip: number, take: number) {
+    // Excluir servicios eliminados
     return this.prisma.service.findMany({
+      where: { deletedAt: null }, // Excluye servicios eliminados
+      skip,
+      take,
       orderBy: {
         createdAt: 'desc',
       },
@@ -26,7 +48,8 @@ export class ServicesService {
     const service = await this.prisma.service.findUnique({
       where: { id },
     });
-    if (!service) {
+
+    if (!service || service.deletedAt) {
       throw new NotFoundException(`Service with ID ${id} not found`);
     }
     return service;
@@ -44,18 +67,30 @@ export class ServicesService {
   }
 
   async remove(id: string) {
-    try {
-      return await this.prisma.service.delete({
-        where: { id },
-      });
-    } catch (error) {
+    // Soft delete actualizando el campo deletedAt
+    const service = await this.prisma.service.findUnique({
+      where: { id },
+    });
+
+    if (!service || service.deletedAt) {
       throw new NotFoundException(`Service with ID ${id} not found`);
     }
+
+    return await this.prisma.service.update({
+      where: { id },
+      data: { deletedAt: new Date() }, // Marca la eliminación lógica
+    });
   }
 
-  async findByBarbershop(barbershopId: string) {
+  async findByBarbershop(barbershopId: string, skip: number, take: number) {
+    // Excluir servicios eliminados
     return this.prisma.service.findMany({
-      where: { barbershopId },
+      where: {
+        barbershopId,
+        deletedAt: null, // Excluye servicios eliminados
+      },
+      skip,
+      take,
       orderBy: {
         createdAt: 'desc',
       },

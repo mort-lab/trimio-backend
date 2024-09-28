@@ -33,6 +33,7 @@ model User {
   barbershops  Barbershop[]
   barbers      Barber[]
   appointments Appointment[]
+  auditLogs    AuditLog[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
@@ -43,6 +44,8 @@ model Barbershop {
   id           String        @id @default(uuid())
   name         String
   location     String
+  latitude     Float         // Coordenada de latitud
+  longitude    Float         // Coordenada de longitud
   ownerId      String
   owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   barbers      Barber[]
@@ -52,6 +55,7 @@ model Barbershop {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
+
 
 model Barber {
   id           String        @id @default(uuid())
@@ -79,6 +83,7 @@ model Service {
   appointments Appointment[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?     // Campo para Soft Delete
 
   @@index([barbershopId])
 }
@@ -124,4 +129,16 @@ model Statistic {
   barbershop        Barbershop @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String
+  action      String
+  changes     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
