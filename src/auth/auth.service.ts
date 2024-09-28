@@ -1,4 +1,4 @@
-// src/auth/auth.service.ts
+//src/auth/auth.service.ts
 
 import {
   Injectable,
@@ -23,7 +23,6 @@ export class AuthService {
   async register(dto: AuthDto) {
     const { email, password, role } = dto;
 
-    // Verificar si el usuario ya existe
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -31,16 +30,14 @@ export class AuthService {
       throw new BadRequestException('El correo ya está registrado');
     }
 
-    // Encriptar la contraseña
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Crear el usuario con el rol seleccionado
     const user = await this.prisma.user.create({
       data: {
         email,
         password: hashedPassword,
-        role, // Asigna el rol: BARBER o CLIENT
+        role,
       },
     });
 
@@ -60,13 +57,11 @@ export class AuthService {
   async login(dto: AuthDto) {
     const { email, password } = dto;
 
-    // Verifica si el usuario existe
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
 
-    // Verifica la contraseña
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales incorrectas');
@@ -87,7 +82,7 @@ export class AuthService {
   async refreshToken(token: string) {
     try {
       const payload = this.jwtService.verify(token, {
-        secret: this.configService.get<string>('JWT_SECRET'), // Usar ConfigService
+        secret: this.configService.get<string>('JWT_SECRET'),
       });
       return this.generateToken(payload.sub, payload.email);
     } catch (e) {
@@ -95,7 +90,7 @@ export class AuthService {
     }
   }
 
-  private generateToken(userId: number, email: string) {
+  private generateToken(userId: string, email: string) {
     const payload = { sub: userId, email };
     return {
       access_token: this.jwtService.sign(payload),
@@ -110,9 +105,6 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException('El correo no está registrado');
     }
-
-    // Aquí puedes generar un token de recuperación y enviar un email
-    // Luego el usuario podrá cambiar su contraseña mediante otro endpoint.
 
     return { message: 'Se ha enviado un enlace para recuperar la contraseña' };
   }

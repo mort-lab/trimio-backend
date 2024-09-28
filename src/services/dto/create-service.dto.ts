@@ -1,7 +1,8 @@
+//src/services/dto/create-service.dto.ts
+
 import {
   IsString,
   IsNumber,
-  IsInt,
   Min,
   IsPositive,
   IsOptional,
@@ -39,17 +40,15 @@ export class CreateServiceDto {
     example: 30,
     description: 'Duración del servicio en minutos',
   })
-  @IsInt()
-  @Min(1)
+  @IsPositive()
   duration: number;
 
   @ApiProperty({
-    example: 1,
+    example: '1b3e7eae-f1b2-47b6-a624-5df847b2d5b3',
     description: 'ID de la barbería a la que pertenece el servicio',
   })
-  @IsInt()
-  @IsPositive()
-  barbershopId: number;
+  @IsString()
+  barbershopId: string; // UUID
 
   @ApiProperty({
     example: true,

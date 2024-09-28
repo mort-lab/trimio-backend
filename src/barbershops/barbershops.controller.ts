@@ -1,3 +1,5 @@
+//src/barbershops/barbershops.controller.ts
+
 import {
   Controller,
   Post,
@@ -22,7 +24,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 
-@ApiTags('Barbershops') // Añadir el tag para barbershops
+@ApiTags('Barbershops')
 @ApiBearerAuth()
 @Controller('barbershops')
 @UseGuards(JwtAuthGuard)
@@ -53,7 +55,7 @@ export class BarbershopsController {
   @ApiResponse({ status: 200, description: 'Successfully fetched barbershop' })
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.barbershopsService.findOne(+id);
+    return this.barbershopsService.findOne(id);
   }
 
   @ApiOperation({ summary: 'Update an existing barbershop' })
@@ -64,13 +66,13 @@ export class BarbershopsController {
     @GetUser() user: User,
     @Body() updateBarbershopDto: UpdateBarbershopDto,
   ) {
-    return this.barbershopsService.update(+id, user.id, updateBarbershopDto);
+    return this.barbershopsService.update(id, user.id, updateBarbershopDto);
   }
 
   @ApiOperation({ summary: 'Delete a barbershop' })
   @ApiResponse({ status: 200, description: 'Barbershop successfully deleted' })
   @Delete(':id')
   remove(@Param('id') id: string, @GetUser() user: User) {
-    return this.barbershopsService.remove(+id, user.id);
+    return this.barbershopsService.remove(id, user.id);
   }
 }

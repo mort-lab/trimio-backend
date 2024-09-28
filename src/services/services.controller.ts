@@ -1,3 +1,5 @@
+//src/services/services.controller.ts
+
 import {
   Controller,
   Get,
@@ -39,14 +41,15 @@ export class ServicesController {
   @ApiOperation({ summary: 'Get all services' })
   @ApiResponse({ status: 200, description: 'Return all services.' })
   findAll() {
-    return this.servicesService.findAll(); // Se eliminan los parámetros de paginación
+    return this.servicesService.findAll(); // No paginación
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a service by id' })
   @ApiResponse({ status: 200, description: 'Return the service.' })
   findOne(@Param('id') id: string) {
-    return this.servicesService.findOne(+id);
+    // UUID string
+    return this.servicesService.findOne(id);
   }
 
   @Put(':id')
@@ -56,7 +59,7 @@ export class ServicesController {
     description: 'The service has been successfully updated.',
   })
   update(@Param('id') id: string, @Body() updateServiceDto: CreateServiceDto) {
-    return this.servicesService.update(+id, updateServiceDto);
+    return this.servicesService.update(id, updateServiceDto);
   }
 
   @Delete(':id')
@@ -66,7 +69,7 @@ export class ServicesController {
     description: 'The service has been successfully deleted.',
   })
   remove(@Param('id') id: string) {
-    return this.servicesService.remove(+id);
+    return this.servicesService.remove(id);
   }
 
   @Get('barbershop/:id')
@@ -76,6 +79,6 @@ export class ServicesController {
     description: 'Return all services for the specified barbershop.',
   })
   findByBarbershop(@Param('id') id: string) {
-    return this.servicesService.findByBarbershop(+id); // Se eliminan los parámetros de paginación
+    return this.servicesService.findByBarbershop(id);
   }
 }

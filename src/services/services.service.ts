@@ -1,3 +1,5 @@
+//src/services/services.service.ts
+
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -20,7 +22,7 @@ export class ServicesService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const service = await this.prisma.service.findUnique({
       where: { id },
     });
@@ -30,7 +32,7 @@ export class ServicesService {
     return service;
   }
 
-  async update(id: number, updateServiceDto: CreateServiceDto) {
+  async update(id: string, updateServiceDto: CreateServiceDto) {
     try {
       return await this.prisma.service.update({
         where: { id },
@@ -41,7 +43,7 @@ export class ServicesService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     try {
       return await this.prisma.service.delete({
         where: { id },
@@ -51,7 +53,7 @@ export class ServicesService {
     }
   }
 
-  async findByBarbershop(barbershopId: number) {
+  async findByBarbershop(barbershopId: string) {
     return this.prisma.service.findMany({
       where: { barbershopId },
       orderBy: {

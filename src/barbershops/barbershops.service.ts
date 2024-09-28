@@ -1,4 +1,5 @@
-// src/barbershops/barbershops.service.ts
+//src/barbershops/barbershops.service.ts
+
 import {
   Injectable,
   ForbiddenException,
@@ -12,7 +13,7 @@ import { UpdateBarbershopDto } from './dto/update-barbershop.dto';
 export class BarbershopsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(ownerId: number, createBarbershopDto: CreateBarbershopDto) {
+  async create(ownerId: string, createBarbershopDto: CreateBarbershopDto) {
     const owner = await this.prisma.user.findUnique({ where: { id: ownerId } });
     if (!owner) {
       throw new NotFoundException('Usuario no encontrado');
@@ -37,7 +38,7 @@ export class BarbershopsService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const barbershop = await this.prisma.barbershop.findUnique({
       where: { id },
     });
@@ -48,8 +49,8 @@ export class BarbershopsService {
   }
 
   async update(
-    id: number,
-    ownerId: number,
+    id: string,
+    ownerId: string,
     updateBarbershopDto: UpdateBarbershopDto,
   ) {
     const barbershop = await this.prisma.barbershop.findUnique({
@@ -69,7 +70,7 @@ export class BarbershopsService {
     });
   }
 
-  async remove(id: number, ownerId: number) {
+  async remove(id: string, ownerId: string) {
     const barbershop = await this.prisma.barbershop.findUnique({
       where: { id },
     });
