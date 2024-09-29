@@ -1,6 +1,5 @@
-// src/barbershops/dto/create-barbershop.dto.ts
-import { IsString, Length, IsNumber, Min, Max } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, Length, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateBarbershopDto {
   @ApiProperty({
@@ -12,22 +11,43 @@ export class CreateBarbershopDto {
   name: string;
 
   @ApiProperty({
-    example: 'Downtown City',
-    description: 'Ubicación de la barbería',
+    example: 'Calle Principal 123',
+    description: 'Dirección de la barbería',
   })
   @IsString()
   @Length(5, 100)
-  location: string;
+  address: string;
 
-  @ApiProperty({ example: 40.7128, description: 'Latitud de la barbería' })
-  @IsNumber()
-  @Min(-90)
-  @Max(90)
-  latitude: number;
+  @ApiProperty({
+    example: 'Ciudad de México',
+    description: 'Ciudad de la barbería',
+  })
+  @IsString()
+  @Length(2, 50)
+  city: string;
 
-  @ApiProperty({ example: -74.006, description: 'Longitud de la barbería' })
-  @IsNumber()
-  @Min(-180)
-  @Max(180)
-  longitude: number;
+  @ApiProperty({
+    example: 'CDMX',
+    description: 'Estado o provincia de la barbería',
+  })
+  @IsString()
+  @Length(2, 50)
+  state: string;
+
+  @ApiProperty({
+    example: '12345',
+    description: 'Código postal de la barbería',
+  })
+  @IsString()
+  @Length(5, 10)
+  zipCode: string;
+
+  @ApiPropertyOptional({
+    example: 'Frente al parque central',
+    description: 'Información adicional sobre la ubicación',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(0, 200)
+  additionalInfo?: string;
 }

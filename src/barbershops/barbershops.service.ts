@@ -1,4 +1,3 @@
-// src/barbershops/barbershops.service.ts
 import {
   Injectable,
   ForbiddenException,
@@ -7,33 +6,78 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBarbershopDto } from './dto/create-barbershop.dto';
 import { UpdateBarbershopDto } from './dto/update-barbershop.dto';
-import { Barbershop } from '@prisma/client';
 
 @Injectable()
 export class BarbershopsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(ownerId: string, createBarbershopDto: CreateBarbershopDto) {
+  async create(userId: string, createBarbershopDto: CreateBarbershopDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    if (user.role !== 'BARBER')
+      throw new ForbiddenException('Only barbers can create barbershops');
+
     return this.prisma.barbershop.create({
       data: {
         ...createBarbershopDto,
-        ownerId,
+        ownerId: userId,
+        barbers: {
+          create: {
+            userId: userId, // Asegúrate que estás creando correctamente el barbero
+          },
+        },
+      },
+      include: {
+        barbers: true,
       },
     });
   }
 
+  async findAllAccessible(
+    userId: string,
+    { page, limit }: { page: number; limit: number },
+  ) {
+    const skip = (page - 1) * limit;
+    return this.prisma.barbershop.findMany({
+      where: {
+        OR: [{ ownerId: userId }, { barbers: { some: { userId } } }],
+      },
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  async findOne(id: string, userId: string) {
+    const barbershop = await this.prisma.barbershop.findUnique({
+      where: { id },
+      include: { owner: true, barbers: true },
+    });
+    if (!barbershop) throw new NotFoundException('Barbershop not found');
+
+    const hasAccess =
+      barbershop.ownerId === userId ||
+      barbershop.barbers.some((barber) => barber.userId === userId);
+    if (!hasAccess)
+      throw new ForbiddenException('You do not have access to this barbershop');
+
+    return barbershop;
+  }
+
   async update(
     id: string,
-    ownerId: string,
+    userId: string,
     updateBarbershopDto: UpdateBarbershopDto,
   ) {
     const barbershop = await this.prisma.barbershop.findUnique({
       where: { id },
     });
-    if (!barbershop) throw new NotFoundException('Barbería no encontrada');
-    if (barbershop.ownerId !== ownerId)
+    if (!barbershop) throw new NotFoundException('Barbershop not found');
+    if (barbershop.ownerId !== userId)
       throw new ForbiddenException(
-        'No tienes permiso para actualizar esta barbería',
+        'You do not have permission to update this barbershop',
       );
 
     return this.prisma.barbershop.update({
@@ -42,55 +86,99 @@ export class BarbershopsService {
     });
   }
 
-  async findAll({ page, limit }: { page: number; limit: number }) {
-    const skip = (page - 1) * limit;
-    try {
-      return await this.prisma.barbershop.findMany({
-        skip,
-        take: limit,
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
-    } catch (error) {
-      console.error('Error in findAll method:', error);
-      throw new Error('Failed to fetch barbershops. Please try again later.');
-    }
-  }
-
-  async findOne(id: string) {
+  async remove(id: string, userId: string) {
     const barbershop = await this.prisma.barbershop.findUnique({
       where: { id },
     });
-    if (!barbershop) throw new NotFoundException('Barbería no encontrada');
-    return barbershop;
-  }
-
-  async findNearby(latitude: number, longitude: number, radius: number) {
-    const barbershops = await this.prisma.$queryRaw<Barbershop[]>`
-      SELECT *, 
-        ( 6371 * acos( cos( radians(${latitude}) ) 
-        * cos( radians( latitude ) ) 
-        * cos( radians( longitude ) - radians(${longitude}) ) 
-        + sin( radians(${latitude}) ) 
-        * sin( radians( latitude ) ) ) ) AS distance 
-      FROM Barbershop
-      HAVING distance < ${radius} / 1000
-      ORDER BY distance
-    `;
-    return barbershops;
-  }
-
-  async remove(id: string, ownerId: string) {
-    const barbershop = await this.prisma.barbershop.findUnique({
-      where: { id },
-    });
-    if (!barbershop) throw new NotFoundException('Barbería no encontrada');
-    if (barbershop.ownerId !== ownerId)
+    if (!barbershop) throw new NotFoundException('Barbershop not found');
+    if (barbershop.ownerId !== userId)
       throw new ForbiddenException(
-        'No tienes permiso para eliminar esta barbería',
+        'You do not have permission to delete this barbershop',
       );
 
     return this.prisma.barbershop.delete({ where: { id } });
+  }
+
+  async requestAccess(barbershopId: string, userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    if (user.role !== 'BARBER')
+      throw new ForbiddenException(
+        'Only barbers can request access to barbershops',
+      );
+
+    const barbershop = await this.prisma.barbershop.findUnique({
+      where: { id: barbershopId },
+      include: { barbers: true },
+    });
+    if (!barbershop) throw new NotFoundException('Barbershop not found');
+
+    const alreadyHasAccess = barbershop.barbers.some(
+      (barber) => barber.userId === userId,
+    );
+    if (alreadyHasAccess)
+      throw new ForbiddenException(
+        'You already have access to this barbershop',
+      );
+
+    const accessRequest = await this.prisma.accessRequest.create({
+      data: {
+        barbershopId,
+        userId,
+        status: 'PENDING',
+      },
+    });
+
+    // Aquí podrías implementar una notificación al propietario de la barbería
+
+    return accessRequest;
+  }
+
+  async approveAccessRequest(requestId: string, ownerId: string) {
+    const accessRequest = await this.prisma.accessRequest.findUnique({
+      where: { id: requestId },
+      include: { barbershop: true },
+    });
+    if (!accessRequest) throw new NotFoundException('Access request not found');
+    if (accessRequest.barbershop.ownerId !== ownerId)
+      throw new ForbiddenException(
+        'Only the barbershop owner can approve access requests',
+      );
+
+    await this.prisma.$transaction([
+      this.prisma.accessRequest.update({
+        where: { id: requestId },
+        data: { status: 'APPROVED' },
+      }),
+      this.prisma.barber.create({
+        data: {
+          userId: accessRequest.userId,
+          barbershopId: accessRequest.barbershopId,
+        },
+      }),
+    ]);
+
+    return { message: 'Access request approved successfully' };
+  }
+
+  async search(
+    city: string,
+    zipCode: string,
+    { page, limit }: { page: number; limit: number },
+  ) {
+    const skip = (page - 1) * limit;
+    return this.prisma.barbershop.findMany({
+      where: {
+        OR: [
+          { city: { contains: city, mode: 'insensitive' } },
+          { zipCode: zipCode },
+        ],
+      },
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 }

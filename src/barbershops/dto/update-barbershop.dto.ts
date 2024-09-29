@@ -1,12 +1,4 @@
-// src/barbershops/dto/update-barbershop.dto.ts
-import {
-  IsString,
-  IsOptional,
-  Length,
-  IsNumber,
-  Min,
-  Max,
-} from 'class-validator';
+import { IsString, IsOptional, Length } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateBarbershopDto {
@@ -20,25 +12,47 @@ export class UpdateBarbershopDto {
   name?: string;
 
   @ApiPropertyOptional({
-    example: 'Nueva Ubicación',
-    description: 'Nueva ubicación de la barbería',
+    example: 'Nueva Calle 456',
+    description: 'Nueva dirección de la barbería',
   })
   @IsOptional()
   @IsString()
   @Length(5, 100)
-  location?: string;
+  address?: string;
 
-  @ApiPropertyOptional({ example: 40.7128, description: 'Latitud' })
+  @ApiPropertyOptional({
+    example: 'Nueva Ciudad',
+    description: 'Nueva ciudad de la barbería',
+  })
   @IsOptional()
-  @IsNumber()
-  @Min(-90)
-  @Max(90)
-  latitude?: number;
+  @IsString()
+  @Length(2, 50)
+  city?: string;
 
-  @ApiPropertyOptional({ example: -74.006, description: 'Longitud' })
+  @ApiPropertyOptional({
+    example: 'Nuevo Estado',
+    description: 'Nuevo estado o provincia de la barbería',
+  })
   @IsOptional()
-  @IsNumber()
-  @Min(-180)
-  @Max(180)
-  longitude?: number;
+  @IsString()
+  @Length(2, 50)
+  state?: string;
+
+  @ApiPropertyOptional({
+    example: '54321',
+    description: 'Nuevo código postal de la barbería',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(5, 10)
+  zipCode?: string;
+
+  @ApiPropertyOptional({
+    example: 'Al lado del nuevo centro comercial',
+    description: 'Nueva información adicional sobre la ubicación',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(0, 200)
+  additionalInfo?: string;
 }

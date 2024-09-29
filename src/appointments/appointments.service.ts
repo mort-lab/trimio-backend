@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
@@ -13,26 +14,58 @@ export class AppointmentsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, createAppointmentDto: CreateAppointmentDto) {
-    const { barberId, serviceId, barbershopId, appointmentDate } =
+    const { barberId, serviceIds, barbershopId, appointmentDate } =
       createAppointmentDto;
 
-    // Verificar si el usuario es un cliente
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (user.role !== 'CLIENT') {
-      throw new ForbiddenException('Only clients can create appointments');
+    const barber = await this.prisma.barber.findFirst({
+      where: { id: barberId, barbershopId }, // Asegúrate de que estás usando barberId y barbershopId correctos
+    });
+    if (!barber) {
+      throw new BadRequestException(
+        'Barber does not belong to this barbershop',
+      );
+    }
+
+    // Verificar si los servicios pertenecen a la barbería
+    const services = await this.prisma.service.findMany({
+      where: { id: { in: serviceIds }, barbershopId },
+    });
+    if (services.length !== serviceIds.length) {
+      throw new BadRequestException(
+        'One or more services do not belong to this barbershop',
+      );
     }
 
     // Crear la cita
-    return this.prisma.appointment.create({
+    const appointment = await this.prisma.appointment.create({
       data: {
         clientId: userId,
         barberId,
-        serviceId,
         barbershopId,
         appointmentDate: new Date(appointmentDate),
         status: 'SCHEDULED',
+        services: {
+          create: serviceIds.map((serviceId) => ({
+            service: { connect: { id: serviceId } },
+          })),
+        },
+      },
+      include: {
+        services: {
+          include: {
+            service: true,
+          },
+        },
+        barber: {
+          include: {
+            user: true,
+          },
+        },
+        barbershop: true,
       },
     });
+
+    return appointment;
   }
 
   async findAll({ page, limit }: { page: number; limit: number }) {
@@ -42,8 +75,17 @@ export class AppointmentsService {
       take: limit,
       include: {
         client: { select: { id: true, email: true } },
-        barber: { select: { id: true, user: { select: { email: true } } } },
-        service: true,
+        barber: {
+          select: {
+            id: true,
+            user: { select: { email: true } },
+          },
+        },
+        services: {
+          include: {
+            service: true,
+          },
+        },
         barbershop: { select: { id: true, name: true } },
       },
     });
@@ -54,8 +96,17 @@ export class AppointmentsService {
       where: { id },
       include: {
         client: { select: { id: true, email: true } },
-        barber: { select: { id: true, user: { select: { email: true } } } },
-        service: true,
+        barber: {
+          select: {
+            id: true,
+            user: { select: { email: true } },
+          },
+        },
+        services: {
+          include: {
+            service: true,
+          },
+        },
         barbershop: { select: { id: true, name: true } },
       },
     });
@@ -66,10 +117,35 @@ export class AppointmentsService {
   }
 
   async update(id: string, updateAppointmentDto: UpdateAppointmentDto) {
+    const { serviceIds, ...rest } = updateAppointmentDto;
+
     try {
       return await this.prisma.appointment.update({
         where: { id },
-        data: updateAppointmentDto,
+        data: {
+          ...rest,
+          services: serviceIds
+            ? {
+                deleteMany: {},
+                create: serviceIds.map((serviceId) => ({
+                  service: { connect: { id: serviceId } },
+                })),
+              }
+            : undefined,
+        },
+        include: {
+          services: {
+            include: {
+              service: true,
+            },
+          },
+          barber: {
+            include: {
+              user: true,
+            },
+          },
+          barbershop: true,
+        },
       });
     } catch (error) {
       throw new NotFoundException(`Appointment with ID ${id} not found`);
@@ -86,7 +162,12 @@ export class AppointmentsService {
     }
   }
 
-  async findByBarber(barberId: string, date: string) {
+  async findByBarber(
+    barberId: string,
+    date: string,
+    { page, limit }: { page: number; limit: number },
+  ) {
+    const skip = (page - 1) * limit;
     const startDate = new Date(date);
     startDate.setHours(0, 0, 0, 0);
     const endDate = new Date(startDate);
@@ -100,14 +181,26 @@ export class AppointmentsService {
           lt: endDate,
         },
       },
+      skip,
+      take: limit,
       include: {
         client: { select: { id: true, email: true } },
-        service: true,
+        services: {
+          include: {
+            service: true,
+          },
+        },
+        barbershop: { select: { id: true, name: true } },
       },
     });
   }
 
-  async findByBarbershop(barbershopId: string, date: string) {
+  async findByBarbershop(
+    barbershopId: string,
+    date: string,
+    { page, limit }: { page: number; limit: number },
+  ) {
+    const skip = (page - 1) * limit;
     const startDate = new Date(date);
     startDate.setHours(0, 0, 0, 0);
     const endDate = new Date(startDate);
@@ -121,20 +214,46 @@ export class AppointmentsService {
           lt: endDate,
         },
       },
+      skip,
+      take: limit,
       include: {
         client: { select: { id: true, email: true } },
-        barber: { select: { id: true, user: { select: { email: true } } } },
-        service: true,
+        barber: {
+          select: {
+            id: true,
+            user: { select: { email: true } },
+          },
+        },
+        services: {
+          include: {
+            service: true,
+          },
+        },
       },
     });
   }
 
-  async findByClient(clientId: string) {
+  async findByClient(
+    clientId: string,
+    { page, limit }: { page: number; limit: number },
+  ) {
+    const skip = (page - 1) * limit;
     return this.prisma.appointment.findMany({
       where: { clientId },
+      skip,
+      take: limit,
       include: {
-        barber: { select: { id: true, user: { select: { email: true } } } },
-        service: true,
+        barber: {
+          select: {
+            id: true,
+            user: { select: { email: true } },
+          },
+        },
+        services: {
+          include: {
+            service: true,
+          },
+        },
         barbershop: { select: { id: true, name: true } },
       },
     });

@@ -1,5 +1,3 @@
-// src/services/dto/create-service.dto.ts
-
 import {
   IsString,
   IsNumber,
@@ -9,6 +7,7 @@ import {
   IsUrl,
   IsBoolean,
   MinLength,
+  IsUUID,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -33,7 +32,7 @@ export class CreateServiceDto {
     description: 'Precio del servicio',
   })
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(5, { message: 'Price must be at least $5' }) // Mínimo precio de $5
+  @Min(5, { message: 'Price must be at least $5' })
   price: number;
 
   @ApiProperty({
@@ -48,8 +47,8 @@ export class CreateServiceDto {
     example: '1b3e7eae-f1b2-47b6-a624-5df847b2d5b3',
     description: 'ID de la barbería a la que pertenece el servicio',
   })
-  @IsString()
-  barbershopId: string; // UUID
+  @IsUUID()
+  barbershopId: string;
 
   @ApiProperty({
     example: true,

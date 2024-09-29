@@ -1,5 +1,3 @@
-// src/services/services.controller.ts
-
 import {
   Controller,
   Get,
@@ -13,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
+import { UpdateServiceDto } from './dto/update-service.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   ApiTags,
@@ -42,7 +41,7 @@ export class ServicesController {
   @ApiOperation({ summary: 'Get all services' })
   @ApiResponse({ status: 200, description: 'Return all services.' })
   findAll(@Query('skip') skip = 0, @Query('take') take = 10) {
-    return this.servicesService.findAll(skip, take); // Paginar resultados
+    return this.servicesService.findAll(+skip, +take);
   }
 
   @Get(':id')
@@ -58,7 +57,7 @@ export class ServicesController {
     status: 200,
     description: 'The service has been successfully updated.',
   })
-  update(@Param('id') id: string, @Body() updateServiceDto: CreateServiceDto) {
+  update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto) {
     return this.servicesService.update(id, updateServiceDto);
   }
 
@@ -82,7 +81,17 @@ export class ServicesController {
     @Param('id') id: string,
     @Query('skip') skip = 0,
     @Query('take') take = 10,
+    @Query('category') category?: string,
+    @Query('minPrice') minPrice?: number,
+    @Query('maxPrice') maxPrice?: number,
   ) {
-    return this.servicesService.findByBarbershop(id, skip, take); // Paginar resultados
+    return this.servicesService.findByBarbershop(
+      id,
+      +skip,
+      +take,
+      category,
+      minPrice,
+      maxPrice,
+    );
   }
 }

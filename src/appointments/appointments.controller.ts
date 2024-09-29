@@ -44,7 +44,7 @@ export class AppointmentsController {
   @ApiOperation({ summary: 'Get all appointments' })
   @ApiResponse({ status: 200, description: 'Return all appointments' })
   findAll(@Query('page') page = 1, @Query('limit') limit = 10) {
-    return this.appointmentsService.findAll({ page, limit });
+    return this.appointmentsService.findAll({ page: +page, limit: +limit });
   }
 
   @Get(':id')
@@ -77,8 +77,16 @@ export class AppointmentsController {
     status: 200,
     description: 'Return appointments for the barber',
   })
-  findByBarber(@Param('id') barberId: string, @Query('date') date: string) {
-    return this.appointmentsService.findByBarber(barberId, date);
+  findByBarber(
+    @Param('id') barberId: string,
+    @Query('date') date: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    return this.appointmentsService.findByBarber(barberId, date, {
+      page: +page,
+      limit: +limit,
+    });
   }
 
   @Get('barbershop/:id')
@@ -90,8 +98,13 @@ export class AppointmentsController {
   findByBarbershop(
     @Param('id') barbershopId: string,
     @Query('date') date: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
   ) {
-    return this.appointmentsService.findByBarbershop(barbershopId, date);
+    return this.appointmentsService.findByBarbershop(barbershopId, date, {
+      page: +page,
+      limit: +limit,
+    });
   }
 
   @Get('client/:id')
@@ -100,7 +113,14 @@ export class AppointmentsController {
     status: 200,
     description: 'Return appointments for the client',
   })
-  findByClient(@Param('id') clientId: string) {
-    return this.appointmentsService.findByClient(clientId);
+  findByClient(
+    @Param('id') clientId: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    return this.appointmentsService.findByClient(clientId, {
+      page: +page,
+      limit: +limit,
+    });
   }
 }
