@@ -44,7 +44,18 @@ export class BarbershopsService {
 
   async findAll({ page, limit }: { page: number; limit: number }) {
     const skip = (page - 1) * limit;
-    return this.prisma.barbershop.findMany({ skip, take: limit });
+    try {
+      return await this.prisma.barbershop.findMany({
+        skip,
+        take: limit,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    } catch (error) {
+      console.error('Error in findAll method:', error);
+      throw new Error('Failed to fetch barbershops. Please try again later.');
+    }
   }
 
   async findOne(id: string) {
