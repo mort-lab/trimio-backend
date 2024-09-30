@@ -1,3 +1,5 @@
+// src/barbershops/dto/create-barbershop.dto.ts
+
 import { IsString, Length, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 

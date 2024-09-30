@@ -17,16 +17,16 @@ export class AppointmentsService {
     const { barberId, serviceIds, barbershopId, appointmentDate } =
       createAppointmentDto;
 
-    const barber = await this.prisma.barber.findFirst({
-      where: { id: barberId, barbershopId }, // Asegúrate de que estás usando barberId y barbershopId correctos
+    const barberProfile = await this.prisma.barberProfile.findFirst({
+      where: { userId: barberId, barbershopId },
     });
-    if (!barber) {
+    if (!barberProfile) {
       throw new BadRequestException(
         'Barber does not belong to this barbershop',
       );
     }
 
-    // Verificar si los servicios pertenecen a la barbería
+    // Verify if the services belong to the barbershop
     const services = await this.prisma.service.findMany({
       where: { id: { in: serviceIds }, barbershopId },
     });
@@ -36,11 +36,11 @@ export class AppointmentsService {
       );
     }
 
-    // Crear la cita
+    // Create the appointment
     const appointment = await this.prisma.appointment.create({
       data: {
         clientId: userId,
-        barberId,
+        barberProfileId: barberProfile.id,
         barbershopId,
         appointmentDate: new Date(appointmentDate),
         status: 'SCHEDULED',
@@ -56,7 +56,7 @@ export class AppointmentsService {
             service: true,
           },
         },
-        barber: {
+        barberProfile: {
           include: {
             user: true,
           },
@@ -75,7 +75,7 @@ export class AppointmentsService {
       take: limit,
       include: {
         client: { select: { id: true, email: true } },
-        barber: {
+        barberProfile: {
           select: {
             id: true,
             user: { select: { email: true } },
@@ -96,7 +96,7 @@ export class AppointmentsService {
       where: { id },
       include: {
         client: { select: { id: true, email: true } },
-        barber: {
+        barberProfile: {
           select: {
             id: true,
             user: { select: { email: true } },
@@ -139,7 +139,7 @@ export class AppointmentsService {
               service: true,
             },
           },
-          barber: {
+          barberProfile: {
             include: {
               user: true,
             },
@@ -175,7 +175,9 @@ export class AppointmentsService {
 
     return this.prisma.appointment.findMany({
       where: {
-        barberId,
+        barberProfile: {
+          userId: barberId,
+        },
         appointmentDate: {
           gte: startDate,
           lt: endDate,
@@ -218,7 +220,7 @@ export class AppointmentsService {
       take: limit,
       include: {
         client: { select: { id: true, email: true } },
-        barber: {
+        barberProfile: {
           select: {
             id: true,
             user: { select: { email: true } },
@@ -243,7 +245,7 @@ export class AppointmentsService {
       skip,
       take: limit,
       include: {
-        barber: {
+        barberProfile: {
           select: {
             id: true,
             user: { select: { email: true } },

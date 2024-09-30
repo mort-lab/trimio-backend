@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum BarberRole {
+  OWNER
+  BARBER
+}
+
 model User {
   id             String          @id @default(uuid())
   email          String          @unique
@@ -16,8 +21,7 @@ model User {
   updatedAt      DateTime        @updatedAt
   appointments   Appointment[]
   auditLogs      AuditLog[]
-  barbers        Barber[]
-  barbershops    Barbershop[]
+  barberProfiles BarberProfile[]
   accessRequests AccessRequest[]
 
   @@index([role])
@@ -31,12 +35,10 @@ model Barbershop {
   state          String
   zipCode        String
   additionalInfo String?
-  ownerId        String
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   appointments   Appointment[]
-  barbers        Barber[]
-  owner          User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  barberProfiles BarberProfile[]
   services       Service[]
   statistics     Statistic[]
   accessRequests AccessRequest[]
@@ -44,16 +46,19 @@ model Barbershop {
   @@index([city, zipCode])
 }
 
-model Barber {
+model BarberProfile {
   id           String        @id @default(uuid())
   userId       String
   barbershopId String
+  role         BarberRole
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  appointments Appointment[]
-  barbershop   Barbershop    @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  barbershop   Barbershop    @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
   statistics   Statistic[]
+
+  @@unique([userId, barbershopId])
 }
 
 model Service {
@@ -78,13 +83,13 @@ model Service {
 model Appointment {
   id              String               @id @default(uuid())
   clientId        String
-  barberId        String
+  barberProfileId String
   appointmentDate DateTime
   status          AppointmentStatus
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
   barbershopId    String
-  barber          Barber               @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  barberProfile   BarberProfile        @relation(fields: [barberProfileId], references: [id], onDelete: Cascade)
   barbershop      Barbershop           @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
   client          User                 @relation(fields: [clientId], references: [id], onDelete: Cascade)
   services        AppointmentService[]
@@ -114,17 +119,17 @@ model Payment {
 }
 
 model Statistic {
-  id                String     @id @default(uuid())
-  barberId          String
+  id                String        @id @default(uuid())
+  barberProfileId   String
   barbershopId      String
   totalAppointments Int
   totalIncome       Float
   averageRating     Float
   totalReviews      Int
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  barber            Barber     @relation(fields: [barberId], references: [id], onDelete: Cascade)
-  barbershop        Barbershop @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  barberProfile     BarberProfile @relation(fields: [barberProfileId], references: [id], onDelete: Cascade)
+  barbershop        Barbershop    @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
 }
 
 model AuditLog {
