@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { BarbershopsModule } from './barbershops/barbershops.module';
 import { ServicesModule } from './services/services.module';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { CustomersModule } from './customers/customers.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AppointmentsModule } from './appointments/appointments.module';
     BarbershopsModule,
     ServicesModule,
     AppointmentsModule,
+    CustomersModule,
   ],
   controllers: [],
   providers: [PrismaService],

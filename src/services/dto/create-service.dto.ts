@@ -4,7 +4,6 @@ import {
   Min,
   IsPositive,
   IsOptional,
-  IsUrl,
   IsBoolean,
   MinLength,
   IsUUID,
@@ -17,7 +16,9 @@ export class CreateServiceDto {
     description: 'Nombre del servicio',
   })
   @IsString()
-  @MinLength(3, { message: 'Service name must be at least 3 characters long' })
+  @MinLength(3, {
+    message: 'El nombre del servicio debe tener al menos 3 caracteres',
+  })
   serviceName: string;
 
   @ApiProperty({
@@ -29,10 +30,10 @@ export class CreateServiceDto {
 
   @ApiProperty({
     example: 25.99,
-    description: 'Precio del servicio',
+    description: 'Precio del servicio (en dólares)',
   })
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(5, { message: 'Price must be at least $5' })
+  @Min(5, { message: 'El precio debe ser al menos $5' })
   price: number;
 
   @ApiProperty({
@@ -40,7 +41,7 @@ export class CreateServiceDto {
     description: 'Duración del servicio en minutos',
   })
   @IsPositive()
-  @Min(10, { message: 'Duration must be at least 10 minutes' })
+  @Min(10, { message: 'La duración debe ser al menos de 10 minutos' })
   duration: number;
 
   @ApiProperty({
@@ -67,13 +68,4 @@ export class CreateServiceDto {
   @IsOptional()
   @IsString()
   category?: string;
-
-  @ApiProperty({
-    example: 'https://example.com/image.jpg',
-    description: 'URL de la imagen del servicio',
-    required: false,
-  })
-  @IsOptional()
-  @IsUrl({}, { message: 'Invalid image URL format' })
-  imageUrl?: string;
 }

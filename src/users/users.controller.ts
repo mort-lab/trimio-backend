@@ -1,4 +1,3 @@
-// src/users/users.controller.ts
 import {
   Controller,
   Get,
@@ -10,7 +9,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { GetUser } from '../auth/get-user.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
@@ -18,6 +17,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
 
 @ApiTags('Users')
@@ -31,6 +31,28 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'User profile fetched successfully',
+    schema: {
+      example: {
+        id: '12345-uuid',
+        email: 'user@example.com',
+        username: 'user123',
+        phone: '+521234567890',
+        role: 'CLIENT',
+        createdAt: '2024-01-01T10:00:00.000Z',
+        updatedAt: '2024-01-10T10:00:00.000Z',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'User not found',
+        error: 'Not Found',
+      },
+    },
   })
   @Get('profile')
   getProfile(@GetUser() user) {
@@ -38,10 +60,66 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Update user profile' })
-  @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile updated successfully',
+    schema: {
+      example: {
+        message: 'Profile updated successfully',
+        user: {
+          id: '12345-uuid',
+          email: 'newemail@example.com',
+          username: 'newuser123',
+          phone: '+521234567890',
+          role: 'CLIENT',
+          createdAt: '2024-01-01T10:00:00.000Z',
+          updatedAt: '2024-02-01T10:00:00.000Z',
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 400,
     description: 'Validation error or incorrect current password',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Current password is required to change password',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Only admins can change the email',
+    schema: {
+      example: {
+        statusCode: 403,
+        message: 'Only admins can change the email',
+        error: 'Forbidden',
+      },
+    },
+  })
+  @ApiBody({
+    description: 'The fields to update in the user profile',
+    type: UpdateUserDto,
+    examples: {
+      example1: {
+        summary: 'Update email and username',
+        value: {
+          email: 'newemail@example.com',
+          username: 'newusername123',
+          phone: '+521234567890',
+        },
+      },
+      example2: {
+        summary: 'Update password',
+        value: {
+          currentPassword: 'OldPassword123!',
+          password: 'NewPassword1!',
+        },
+      },
+    },
   })
   @Put('update-profile')
   async updateProfile(@GetUser() user, @Body() updateUserDto: UpdateUserDto) {
@@ -61,10 +139,33 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Delete user account' })
-  @ApiResponse({ status: 200, description: 'Account deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Account deleted successfully',
+    schema: {
+      example: {
+        message: 'Account deleted successfully',
+      },
+    },
+  })
   @ApiResponse({
     status: 400,
     description: 'Current password required to delete account',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Current password is required to delete account',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiBody({
+    description: 'Current password required to delete the user account',
+    schema: {
+      example: {
+        currentPassword: 'CurrentPassword123!',
+      },
+    },
   })
   @Delete('delete-account')
   async deleteAccount(

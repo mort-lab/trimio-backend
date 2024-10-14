@@ -1,11 +1,9 @@
-// src/barbershops/dto/create-barbershop.dto.ts
-
-import { IsString, Length, IsOptional } from 'class-validator';
+import { IsString, Length, IsOptional, IsPhoneNumber } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateBarbershopDto {
   @ApiProperty({
-    example: 'Central Barbershop',
+    example: 'Mort Barbershop',
     description: 'Nombre de la barbería',
   })
   @IsString()
@@ -13,7 +11,7 @@ export class CreateBarbershopDto {
   name: string;
 
   @ApiProperty({
-    example: 'Calle Principal 123',
+    example: 'De pinares plaza 1',
     description: 'Dirección de la barbería',
   })
   @IsString()
@@ -21,7 +19,7 @@ export class CreateBarbershopDto {
   address: string;
 
   @ApiProperty({
-    example: 'Ciudad de México',
+    example: 'Donostia',
     description: 'Ciudad de la barbería',
   })
   @IsString()
@@ -29,7 +27,7 @@ export class CreateBarbershopDto {
   city: string;
 
   @ApiProperty({
-    example: 'CDMX',
+    example: 'Gipuzkoa',
     description: 'Estado o provincia de la barbería',
   })
   @IsString()
@@ -37,7 +35,7 @@ export class CreateBarbershopDto {
   state: string;
 
   @ApiProperty({
-    example: '12345',
+    example: '20018',
     description: 'Código postal de la barbería',
   })
   @IsString()
@@ -50,6 +48,23 @@ export class CreateBarbershopDto {
   })
   @IsOptional()
   @IsString()
-  @Length(0, 200)
   additionalInfo?: string;
+
+  @ApiPropertyOptional({
+    example: '+34',
+    description: 'Código de país del número de teléfono',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(1, 5)
+  countryCode?: string;
+
+  @ApiPropertyOptional({
+    example: '123456789',
+    description: 'Número de teléfono de la barbería',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(5, 15)
+  phoneNumber?: string;
 }

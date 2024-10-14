@@ -1,5 +1,3 @@
-// src/users/users.service.ts
-
 import {
   Injectable,
   BadRequestException,
@@ -20,6 +18,8 @@ export class UsersService {
       select: {
         id: true,
         email: true,
+        username: true,
+        phone: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -38,7 +38,7 @@ export class UsersService {
     userRole: string,
     updateUserDto: UpdateUserDto,
   ) {
-    const { email, password, currentPassword } = updateUserDto;
+    const { email, password, currentPassword, username, phone } = updateUserDto;
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
@@ -58,6 +58,7 @@ export class UsersService {
     }
 
     const data: any = {};
+
     if (email) {
       // Validación de unicidad del email
       const existingUser = await this.prisma.user.findUnique({
@@ -67,6 +68,21 @@ export class UsersService {
         throw new BadRequestException('Email is already in use');
       }
       data.email = email;
+    }
+
+    if (username) {
+      // Validar si el username ya existe
+      const existingUser = await this.prisma.user.findUnique({
+        where: { username },
+      });
+      if (existingUser && existingUser.id !== userId) {
+        throw new BadRequestException('Username is already in use');
+      }
+      data.username = username;
+    }
+
+    if (phone) {
+      data.phone = phone;
     }
 
     // Guardar los cambios auditando quién los hizo
@@ -80,7 +96,7 @@ export class UsersService {
       data: {
         userId: userId,
         action: 'update_profile',
-        changes: JSON.stringify(updateUserDto), // Puedes ajustar según la auditoría que quieras registrar
+        changes: JSON.stringify(updateUserDto),
         updatedAt: new Date(),
       },
     });

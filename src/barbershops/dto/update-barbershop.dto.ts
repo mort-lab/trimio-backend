@@ -48,6 +48,24 @@ export class UpdateBarbershopDto {
   zipCode?: string;
 
   @ApiPropertyOptional({
+    example: '+34',
+    description: 'Nuevo código de país del número de teléfono',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(1, 5)
+  countryCode?: string; // Actualización de código de país
+
+  @ApiPropertyOptional({
+    example: '123456789',
+    description: 'Nuevo número de teléfono de la barbería',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(5, 15)
+  phoneNumber?: string; // Actualización del número de teléfono
+
+  @ApiPropertyOptional({
     example: 'Al lado del nuevo centro comercial',
     description: 'Nueva información adicional sobre la ubicación',
   })

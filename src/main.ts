@@ -1,13 +1,14 @@
-//src/main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express'; // Asegúrate de importar esto
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors();
 
   // Use ValidationPipe for validating DTOs
@@ -32,6 +33,9 @@ async function bootstrap() {
 
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
+
+  // Servir archivos estáticos desde la carpeta 'uploads'
+  app.useStaticAssets(join(__dirname, '..', 'uploads'));
 
   await app.listen(3003);
 }

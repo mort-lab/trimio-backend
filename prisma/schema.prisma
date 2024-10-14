@@ -12,149 +12,6 @@ enum BarberRole {
   BARBER
 }
 
-model User {
-  id             String          @id @default(uuid())
-  email          String          @unique
-  password       String
-  role           Role
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  appointments   Appointment[]
-  auditLogs      AuditLog[]
-  barberProfiles BarberProfile[]
-  accessRequests AccessRequest[]
-
-  @@index([role])
-}
-
-model Barbershop {
-  id             String          @id @default(uuid())
-  name           String
-  address        String
-  city           String
-  state          String
-  zipCode        String
-  additionalInfo String?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  appointments   Appointment[]
-  barberProfiles BarberProfile[]
-  services       Service[]
-  statistics     Statistic[]
-  accessRequests AccessRequest[]
-
-  @@index([city, zipCode])
-}
-
-model BarberProfile {
-  id           String        @id @default(uuid())
-  userId       String
-  barbershopId String
-  role         BarberRole
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  barbershop   Barbershop    @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
-  appointments Appointment[]
-  statistics   Statistic[]
-
-  @@unique([userId, barbershopId])
-}
-
-model Service {
-  id           String               @id @default(uuid())
-  serviceName  String
-  description  String
-  price        Float
-  duration     Int
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  barbershopId String
-  category     String?
-  imageUrl     String?
-  isActive     Boolean              @default(true)
-  deletedAt    DateTime?
-  appointments AppointmentService[]
-  barbershop   Barbershop           @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
-
-  @@index([barbershopId])
-}
-
-model Appointment {
-  id              String               @id @default(uuid())
-  clientId        String
-  barberProfileId String
-  appointmentDate DateTime
-  status          AppointmentStatus
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  barbershopId    String
-  barberProfile   BarberProfile        @relation(fields: [barberProfileId], references: [id], onDelete: Cascade)
-  barbershop      Barbershop           @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
-  client          User                 @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  services        AppointmentService[]
-  payment         Payment?
-}
-
-model AppointmentService {
-  id            String      @id @default(uuid())
-  appointmentId String
-  serviceId     String
-  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
-  service       Service     @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-
-  @@unique([appointmentId, serviceId])
-}
-
-model Payment {
-  id              String        @id @default(uuid())
-  appointmentId   String        @unique
-  amount          Float
-  currency        String
-  paymentStatus   PaymentStatus
-  stripePaymentId String
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  appointment     Appointment   @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
-}
-
-model Statistic {
-  id                String        @id @default(uuid())
-  barberProfileId   String
-  barbershopId      String
-  totalAppointments Int
-  totalIncome       Float
-  averageRating     Float
-  totalReviews      Int
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  barberProfile     BarberProfile @relation(fields: [barberProfileId], references: [id], onDelete: Cascade)
-  barbershop        Barbershop    @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
-}
-
-model AuditLog {
-  id        String   @id @default(uuid())
-  userId    String
-  action    String
-  changes   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-model AccessRequest {
-  id           String             @id @default(uuid())
-  barbershopId String
-  userId       String
-  status       AccessRequestStatus
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  barbershop   Barbershop         @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
-  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
 enum Role {
   CLIENT
   BARBER
@@ -177,4 +34,183 @@ enum AccessRequestStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+model User {
+  id                String          @id @default(uuid())
+  email             String          @unique
+  username          String?         @unique   
+  phone             String?                    
+  password          String
+  role              Role
+  resetToken        String?         
+  resetTokenExpiry  DateTime?       
+  refreshToken      String?         
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now()) @updatedAt
+  appointments      Appointment[]   
+  customers         Customer[]      
+  auditLogs         AuditLog[]      
+  barberProfiles    BarberProfile[] 
+  accessRequests    AccessRequest[] 
+  emailVerified    Boolean        @default(false)
+
+  @@index([role])
+}
+
+model Barbershop {
+  id                String          @id @default(uuid())
+  name              String
+  address           String
+  city              String
+  state             String
+  zipCode           String
+  additionalInfo    String?
+  countryCode       String?         
+  phoneNumber       String?         
+  lat               Float?          
+  lng               Float?          
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now()) @updatedAt
+  customers         Customer[]      
+  appointments      Appointment[]   
+  barberProfiles    BarberProfile[]
+  services          Service[]
+  statistics        Statistic[]
+  accessRequests    AccessRequest[]
+  barbershopImages  BarbershopImage[]
+
+  @@index([city, zipCode])
+}
+
+model Customer {
+  id                String          @id @default(uuid())
+  userId            String          
+  barbershopId      String          
+  firstVisitDate    DateTime?       
+  lastVisitDate     DateTime?       
+  totalSpent        Float           @default(0.0) 
+  averageRating     Float?          
+  appointmentCount  Int             @default(0) 
+  notes             String?         
+  
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  barbershop        Barbershop      @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  appointments      Appointment[]   
+}
+
+model BarberProfile {
+  id           String        @id @default(uuid())
+  userId       String
+  barbershopId String
+  role         BarberRole
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now()) @updatedAt
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  barbershop   Barbershop    @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+  statistics   Statistic[]
+
+  @@unique([userId, barbershopId])
+}
+
+model Service {
+  id           String           @id @default(uuid())
+  serviceName  String
+  description  String
+  price        Float
+  duration     Int
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @default(now()) @updatedAt
+  barbershopId String
+  category     String?
+  isActive     Boolean          @default(true)
+  deletedAt    DateTime?
+  appointments AppointmentService[]
+  barbershop   Barbershop       @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+}
+
+model BarbershopImage {
+  id          String    @id @default(uuid())
+  url         String    
+  barbershopId String
+  barbershop  Barbershop @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+}
+
+model Appointment {
+  id              String               @id @default(uuid())
+  customerId      String?              
+  clientId        String               
+  barberProfileId String
+  barbershopId    String
+  appointmentDate DateTime
+  status          AppointmentStatus
+  barberProfile   BarberProfile        @relation(fields: [barberProfileId], references: [id])
+  barbershop      Barbershop           @relation(fields: [barbershopId], references: [id])
+  customer        Customer?            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  client          User                 @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  services        AppointmentService[]
+  payment         Payment?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+}
+
+model AppointmentService {
+  id            String      @id @default(uuid())
+  appointmentId String
+  serviceId     String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  service       Service     @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([appointmentId, serviceId])
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  appointmentId   String        @unique
+  amount          Float
+  currency        String
+  paymentStatus   PaymentStatus
+  stripePaymentId String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now()) @updatedAt
+  appointment     Appointment   @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+}
+
+model Statistic {
+  id                String        @id @default(uuid())
+  barberProfileId   String
+  barbershopId      String
+  totalAppointments Int
+  totalIncome       Float
+  averageRating     Float
+  totalReviews      Int
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @default(now()) @updatedAt
+  barberProfile     BarberProfile @relation(fields: [barberProfileId], references: [id], onDelete: Cascade)
+  barbershop        Barbershop    @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  changes   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AccessRequest {
+  id           String             @id @default(uuid())
+  barbershopId String
+  userId       String
+  status       AccessRequestStatus
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @default(now()) @updatedAt
+  barbershop   Barbershop         @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

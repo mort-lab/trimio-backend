@@ -1,11 +1,10 @@
-// src/users/dto/update-user.dto.ts
-
 import {
   IsEmail,
   IsOptional,
   IsString,
   MinLength,
   Matches,
+  IsPhoneNumber,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -17,6 +16,23 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEmail({}, { message: 'Invalid email format' })
   email?: string;
+
+  @ApiPropertyOptional({
+    description: 'New username of the user',
+    example: 'newusername123',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(3, { message: 'Username must be at least 3 characters long' })
+  username?: string;
+
+  @ApiPropertyOptional({
+    description: 'New phone number of the user',
+    example: '+521234567890',
+  })
+  @IsOptional()
+  @IsPhoneNumber(null, { message: 'Invalid phone number' })
+  phone?: string;
 
   @ApiPropertyOptional({
     description: 'New password for the user',

@@ -8,17 +8,19 @@ import {
   Delete,
   UseGuards,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Request } from 'express';
 
 @ApiTags('Services')
 @ApiBearerAuth()
@@ -33,22 +35,35 @@ export class ServicesController {
     status: 201,
     description: 'The service has been successfully created.',
   })
-  create(@Body() createServiceDto: CreateServiceDto) {
-    return this.servicesService.create(createServiceDto);
+  create(@Body() createServiceDto: CreateServiceDto, @Req() req: Request) {
+    const user = req.user as any; // Type assertion, adjust based on your actual user object structure
+    return this.servicesService.create(createServiceDto, user);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all services' })
-  @ApiResponse({ status: 200, description: 'Return all services.' })
-  findAll(@Query('skip') skip = 0, @Query('take') take = 10) {
-    return this.servicesService.findAll(+skip, +take);
+  @ApiResponse({
+    status: 200,
+    description: 'Return all services.',
+  })
+  findAll(
+    @Query('skip') skip = 0,
+    @Query('take') take = 10,
+    @Req() req: Request,
+  ) {
+    const user = req.user as any; // Type assertion, adjust based on your actual user object structure
+    return this.servicesService.findAll(+skip, +take, user);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a service by id' })
-  @ApiResponse({ status: 200, description: 'Return the service.' })
-  findOne(@Param('id') id: string) {
-    return this.servicesService.findOne(id);
+  @ApiResponse({
+    status: 200,
+    description: 'Return the service.',
+  })
+  findOne(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user as any; // Type assertion, adjust based on your actual user object structure
+    return this.servicesService.findOne(id, user);
   }
 
   @Put(':id')
@@ -57,8 +72,13 @@ export class ServicesController {
     status: 200,
     description: 'The service has been successfully updated.',
   })
-  update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto) {
-    return this.servicesService.update(id, updateServiceDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateServiceDto: UpdateServiceDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user as any; // Type assertion, adjust based on your actual user object structure
+    return this.servicesService.update(id, updateServiceDto, user);
   }
 
   @Delete(':id')
@@ -67,8 +87,9 @@ export class ServicesController {
     status: 200,
     description: 'The service has been successfully deleted.',
   })
-  remove(@Param('id') id: string) {
-    return this.servicesService.remove(id);
+  remove(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user as any; // Type assertion, adjust based on your actual user object structure
+    return this.servicesService.remove(id, user);
   }
 
   @Get('barbershop/:id')
@@ -81,17 +102,7 @@ export class ServicesController {
     @Param('id') id: string,
     @Query('skip') skip = 0,
     @Query('take') take = 10,
-    @Query('category') category?: string,
-    @Query('minPrice') minPrice?: number,
-    @Query('maxPrice') maxPrice?: number,
   ) {
-    return this.servicesService.findByBarbershop(
-      id,
-      +skip,
-      +take,
-      category,
-      minPrice,
-      maxPrice,
-    );
+    return this.servicesService.findByBarbershop(id, +skip, +take);
   }
 }
