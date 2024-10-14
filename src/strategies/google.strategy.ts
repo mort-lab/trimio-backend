@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 
-// google.strategy.ts
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
-    private configService: ConfigService,
     private prisma: PrismaService,
+    private configService: ConfigService,
   ) {
     super({
       clientID: configService.get('GOOGLE_CLIENT_ID'),
@@ -18,25 +17,30 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       scope: ['email', 'profile'],
     });
   }
-
   async validate(
     accessToken: string,
     refreshToken: string,
     profile: any,
     done: VerifyCallback,
   ): Promise<any> {
-    const { emails } = profile;
-    const email = emails[0].value;
+    const email = profile?.emails?.[0]?.value;
+
+    if (!email) {
+      return done(
+        new Error('No email associated with this Google account'),
+        null,
+      );
+    }
 
     let user = await this.prisma.user.findUnique({ where: { email } });
 
-    // Crear usuario si no existe, con un rol por defecto de CLIENT
+    // Crear el usuario si no existe
     if (!user) {
       user = await this.prisma.user.create({
         data: {
           email,
-          password: '', // No password for OAuth
-          role: 'CLIENT', // Default role
+          password: '', // No password required for OAuth users
+          role: 'CLIENT',
         },
       });
     }

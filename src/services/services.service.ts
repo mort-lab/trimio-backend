@@ -29,11 +29,11 @@ export class ServicesService {
       (profile) => profile.userId === user.id,
     );
 
-    if (!userProfile || userProfile.role !== BarberRole.OWNER) {
-      throw new ForbiddenException(
-        'Only barbershop owners can create services',
-      );
-    }
+    // if (!userProfile || userProfile.role !== BarberRole.OWNER) {
+    //   throw new ForbiddenException(
+    //     'Only barbershop owners can create services',
+    //   );
+    // }
 
     const existingService = await this.prisma.service.findFirst({
       where: {

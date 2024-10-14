@@ -35,17 +35,6 @@ export class CustomersController {
     return this.customersService.getCustomerAppointments(user.id);
   }
 
-  @Get('appointments/:id')
-  @ApiOperation({ summary: 'Get appointment details' })
-  @ApiResponse({ status: 200, description: 'Returns the appointment details' })
-  @ApiParam({ name: 'id', type: 'string', description: 'Appointment ID' })
-  async getAppointmentDetails(
-    @GetUser() user: User,
-    @Param('id') appointmentId: string,
-  ) {
-    return this.customersService.getAppointmentDetails(user.id, appointmentId);
-  }
-
   @Get('statistics')
   @ApiOperation({ summary: 'Get customer statistics' })
   @ApiResponse({ status: 200, description: 'Returns the customer statistics' })
@@ -68,14 +57,13 @@ export class CustomersController {
     return this.customersService.getBarbershopCustomers(user.id, barbershopId);
   }
 
-  @Get('barber/:barberId')
-  @ApiOperation({ summary: 'Get customers for a barber' })
-  @ApiResponse({ status: 200, description: "Returns the barber's customers" })
-  @ApiParam({ name: 'barberId', type: 'string', description: 'Barber ID' })
-  async getBarberCustomers(
-    @GetUser() user: User,
-    @Param('barberId') barberId: string,
-  ) {
-    return this.customersService.getBarberCustomers(user.id, barberId);
+  @Get('favorite-barbershops')
+  @ApiOperation({ summary: 'Get customer favorite barbershops' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the customer favorite barbershops',
+  })
+  async getFavoriteBarbershops(@GetUser() user: User) {
+    return this.customersService.getFavoriteBarbershops(user.id);
   }
 }

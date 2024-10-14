@@ -96,25 +96,30 @@ export class AuthController {
     status: 401,
     description: 'Google OAuth token is invalid',
   })
-  @Post('google')
+  // Iniciar login con Google
+  @Get('google')
   @UseGuards(GoogleAuthGuard)
-  async googleLogin(
-    @Req() req: Request & { user: { id: string; email: string } },
-  ) {
-    return this.authService.googleLogin(req.user);
+  async googleAuth() {
+    return;
   }
 
+  // Callback de Google
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  async googleAuthRedirect(@Req() req, @Res() res: Response) {
+  async googleAuthRedirect(
+    @Req() req: Request & { user: any },
+    @Res() res: Response,
+  ) {
     const user = req.user;
+
+    // Genera los tokens
     const tokens = await this.authService.generateTokens(user.id, user.email);
 
-    // Redirección según el tipo de usuario
+    // Redirige al frontend dependiendo del rol del usuario
     const redirectUrl =
       user.role === 'BARBER'
-        ? this.configService.get('GOOGLE_REDIRECT_URL_BARBER_NEXT')
-        : this.configService.get('GOOGLE_REDIRECT_URL_CLIENT_EXPO');
+        ? this.configService.get('GOOGLE_REDIRECT_URL_BARBER')
+        : this.configService.get('GOOGLE_REDIRECT_URL_CLIENT');
 
     return res.redirect(`${redirectUrl}?jwtUser=${tokens.access_token}`);
   }

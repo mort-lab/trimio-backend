@@ -132,8 +132,8 @@ export class AuthService {
       where: { resetToken: token },
     });
 
-    if (!user) {
-      throw new BadRequestException('Invalid verification token');
+    if (!user || !user.resetToken) {
+      throw new BadRequestException('Invalid or expired verification token');
     }
 
     await this.prisma.user.update({
@@ -255,6 +255,7 @@ export class AuthService {
       const user = await this.prisma.user.findUnique({
         where: { id: payload.sub },
       });
+
       if (!user || !user.refreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
       }
@@ -276,7 +277,7 @@ export class AuthService {
     }
   }
 
-  public async generateTokens(userId: string, email: string) {
+  async generateTokens(userId: string, email: string) {
     const payload = { sub: userId, email };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -303,51 +304,20 @@ export class AuthService {
   async googleLogin(googleUser: { id: string; email: string }) {
     let user = await this.prisma.user.findUnique({
       where: { email: googleUser.email },
-      include: { customers: true },
     });
 
     if (!user) {
-      const defaultPassword = uuidv4();
-      const hashedPassword = await bcrypt.hash(defaultPassword, 12);
-
       user = await this.prisma.user.create({
         data: {
           email: googleUser.email,
-          password: hashedPassword,
-          role: Role.CLIENT,
+          password: '',
+          role: 'CLIENT',
           emailVerified: true,
         },
-        include: { customers: true },
-      });
-
-      const defaultBarbershop = await this.prisma.barbershop.findFirst();
-      if (defaultBarbershop) {
-        await this.prisma.customer.create({
-          data: {
-            userId: user.id,
-            barbershopId: defaultBarbershop.id,
-          },
-        });
-      }
-
-      user = await this.prisma.user.findUnique({
-        where: { id: user.id },
-        include: { customers: true },
       });
     }
 
     const tokens = await this.generateTokens(user.id, user.email);
-    await this.updateRefreshToken(user.id, tokens.refresh_token);
-
-    return {
-      message: 'Login successful',
-      user: {
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-        customerId: user.customers[0]?.id,
-      },
-      ...tokens,
-    };
+    return { ...tokens, user };
   }
 }

@@ -54,6 +54,7 @@ model User {
   barberProfiles    BarberProfile[] 
   accessRequests    AccessRequest[] 
   emailVerified    Boolean        @default(false)
+  favoriteBarbershops FavoriteBarbershop[]
 
   @@index([role])
 }
@@ -79,25 +80,36 @@ model Barbershop {
   statistics        Statistic[]
   accessRequests    AccessRequest[]
   barbershopImages  BarbershopImage[]
+  favoriteByUsers   FavoriteBarbershop[] 
 
   @@index([city, zipCode])
 }
 
+model FavoriteBarbershop {
+  id          String     @id @default(uuid())
+  userId      String
+  barbershopId String
+  createdAt   DateTime   @default(now())
+
+  // Define relations properly
+  user        User       @relation(fields: [userId], references: [id])
+  barbershop  Barbershop @relation(fields: [barbershopId], references: [id])
+
+  @@unique([userId, barbershopId])  // Ensure the same user can't favorite the same barbershop more than once
+}
 model Customer {
   id                String          @id @default(uuid())
-  userId            String          
-  barbershopId      String          
-  firstVisitDate    DateTime?       
-  lastVisitDate     DateTime?       
-  totalSpent        Float           @default(0.0) 
-  averageRating     Float?          
-  appointmentCount  Int             @default(0) 
-  notes             String?         
-  
+  userId            String
+  barbershopId      String
+  firstVisitDate    DateTime?
+  lastVisitDate     DateTime?
+  totalSpent        Float           @default(0.0)  
+  appointmentCount  Int             @default(0)    
   user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   barbershop        Barbershop      @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
-  appointments      Appointment[]   
+  appointments      Appointment[]
 }
+
 
 model BarberProfile {
   id           String        @id @default(uuid())
